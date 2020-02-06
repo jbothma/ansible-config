@@ -1,0 +1,76 @@
+---
+- hosts: dokkus
+  become: yes
+
+  vars:
+
+  pre_tasks:
+    - name: "generate dokku_users"
+      set_fact:
+       dokku_users: "{{ dokku_users|default([]) + [{'name': item, 'username': item,  'ssh_key': lookup('file', 'files/'+ item + '.key.pub')}] }}"
+      with_items: "{{ all_hosts_admins + host_extra_admins }}"
+      tags:
+        - dokku-ssh-keys
+
+    - name: Set timezone to UTC
+      timezone:
+        name: UTC
+      register: timezone
+
+    - name: Set up a unique hostname
+      hostname: name={{ inventory_hostname }}
+
+    - name: Set up unattended-upgrades
+      apt:
+        update_cache: yes
+        name: unattended-upgrades
+        state: present
+
+    - name: Generate SSH keys
+      shell: ssh-keygen -b 2048 -t rsa -f /root/.ssh/id_rsa -q -N ""
+      args:
+        creates: /root/.ssh/id_rsa
+
+  roles:
+   - role: dokku_bot.ansible_dokku
+
+  tasks:
+
+    - name: "Default packages are installed"
+      apt:
+        pkg:
+          - emacs-nox
+          - htop
+          - screen
+
+    - name: "Firewall allows whitelist of ports"
+      ufw:
+        rule: allow
+        port: "{{ item }}"
+        proto: tcp
+      loop:
+        - ssh
+        - http
+        - https
+      register: firewall_whitelist
+
+    - name: "Firewall allows everything outgoing by default"
+      ufw:
+        default: allow
+        direction: outgoing
+      register: firewall_out
+
+    - name: "Firewall blocks everything incoming by default"
+      ufw:
+        default: deny
+        direction: incoming
+      register: firewall_in
+
+    - name: Firewall is enabled
+      ufw:
+        state: enabled
+
+    - name: "Firewall is reloaded"
+      ufw:
+        state: reloaded
+      when: firewall_whitelist.changed or firewall_in.changed or firewall_out.changed
