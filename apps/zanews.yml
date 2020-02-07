@@ -1,0 +1,46 @@
+---
+- hosts:
+    - hetzner1.whatcanido.org.za
+  become: yes
+  roles:
+   - dokku_bot.ansible_dokku
+
+
+  vars:
+    app_name: zanews
+    app_domain: news.publicpeople.org.za
+    dokku_daemon_install: false # We install this using a dedicated playbook
+    dokku_plugins:
+      - name: letsencrypt
+        url: https://github.com/dokku/dokku-letsencrypt.git
+      - name: postgres
+        url: https://github.com/dokku/dokku-postgres.git
+
+  tasks:
+
+    - name: "Dokku app exists"
+      dokku_app:
+        app: "{{ app_name }}"
+
+    - name: "Dokku app config is set"
+      dokku_config:
+        app: "{{ app_name }}"
+        config:
+          DOKKU_LETSENCRYPT_EMAIL: 'jbothma@gmail.com'
+          DJANGO_DECRET_KEY: "{{ lookup('passwordstore', 'apps/zanews/DJANGO_SECRET_KEY') }}"
+          TAG_MANAGER_CONTAINER_ID: "GTM-P93SJCG"
+          SENTRY_DSN: "https://388b7389ba344abb9ae64b9daaa2976a@sentry.io/2304582"
+
+
+    - name: "Dokku app domains are configured"
+      dokku_domains:
+        app: "{{ app_name }}"
+        domains:
+          - "{{ app_domain }}"
+          - "www.{{ app_domain }}"
+          - "api.{{ app_domain }}"
+          - "bills.{{ app_domain }}"
+
+    - name: "Your dokku git remote"
+      debug:
+        msg: "dokku@{{ inventory_hostname }}:{{ app_name }}"
