@@ -27,7 +27,7 @@
         app: "{{ app_name }}"
         config:
           DOKKU_LETSENCRYPT_EMAIL: 'jbothma@gmail.com'
-          DJANGO_DECRET_KEY: "{{ lookup('passwordstore', 'apps/zanews/DJANGO_SECRET_KEY') }}"
+          DJANGO_SECRET_KEY: "{{ lookup('passwordstore', 'apps/zanews/DJANGO_SECRET_KEY') }}"
           TAG_MANAGER_CONTAINER_ID: "GTM-P93SJCG"
           SENTRY_DSN: "https://388b7389ba344abb9ae64b9daaa2976a@sentry.io/2304582"
 
@@ -38,8 +38,7 @@
         domains:
           - "{{ app_domain }}"
           - "www.{{ app_domain }}"
-          - "api.{{ app_domain }}"
-          - "bills.{{ app_domain }}"
+
 
     - name: "Your dokku git remote"
       debug:
