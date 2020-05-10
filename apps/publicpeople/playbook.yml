@@ -1,0 +1,60 @@
+---
+- hosts:
+    - publicpeople
+  become: yes
+  roles:
+   - dokku_bot.ansible_dokku
+
+
+  vars:
+    app_name: publicpeople
+    username: "{{ app_name }}"
+    app_domain: publicpeople.org.za
+    dokku_daemon_install: false # We install this using a dedicated playbook
+    dokku_plugins:
+      - name: letsencrypt
+        url: https://github.com/dokku/dokku-letsencrypt.git
+      - name: postgres
+        url: https://github.com/dokku/dokku-postgres.git
+
+  tasks:
+
+    - name: "Dokku app exists"
+      dokku_app:
+        app: "{{ app_name }}"
+
+    - name: "Dokku app config is set"
+      dokku_config:
+        app: "{{ app_name }}"
+        config:
+          DJANGO_DEBUG: "false"
+          DOKKU_LETSENCRYPT_EMAIL: 'jbothma@gmail.com'
+          DJANGO_SECRET_KEY: "{{ lookup('passwordstore', 'apps/publicpeople/DJANGO_SECRET_KEY') }}"
+          SENTRY_DSN: "https://388b7389ba344abb9ae64b9daaa2976a@o350004.ingest.sentry.io/2304582"
+
+    - name: "Dokku app domains are configured"
+      dokku_domains:
+        app: "{{ app_name }}"
+        domains:
+          - "{{ app_domain }}"
+          - "www.{{ app_domain }}"
+
+
+    - name: "Your dokku git remote"
+      debug:
+        msg: "dokku@{{ inventory_hostname }}:{{ app_name }}"
+
+
+#     - name: "Service users exists"
+#       user:
+#         name: "{{ username }}"
+#         shell: /bin/nologin
+#
+#
+#     - name: Schedule daily popolo import
+#       cron:
+#         name: "import pombola popolo from People's Assembly"
+#         minute: "0"
+#         hour: "4"
+#         job: "dokku --rm run {{ app_name }} python manage.py popolo_sources_update https://www.pa.org.za/media_root/popolo_json/pombola.json"
+#         user: "{{ username }}"

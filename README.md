@@ -1,5 +1,5 @@
-Ansible configuration management for OpenUp
-===========================================
+Ansible configuration management for JD's stuff
+===============================================
 
 Ansible allows us to repeatably deploy configuration to servers
 with little or no manual steps. It should make it almost trivial

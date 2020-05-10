@@ -1,0 +1,5 @@
+all:
+  children:
+    publicpeople:
+      hosts:
+        hetzner1.whatcanido.org.za
