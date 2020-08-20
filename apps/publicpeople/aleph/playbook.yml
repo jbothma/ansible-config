@@ -1,0 +1,111 @@
+---
+- hosts:
+    - publicpeople-aleph
+  become: yes
+  roles:
+   - dokku_bot.ansible_dokku
+
+
+  vars:
+    app_name: publicpeople-aleph
+    app_domain: aleph.publicpeople.org.za
+    app_env:
+      ALEPH_SECRET_KEY: "{{ lookup('passwordstore', 'apps/publicpeople/aleph/SECRET_KEY') }}"
+      ALEPH_APP_TITLE: Aleph
+      ALEPH_APP_NAME: aleph
+      ALEPH_UI_URL: "https://{{ app_domain }}/"
+      ALEPH_PASSWORD_LOGIN: true
+      ALEPH_OAUTH: false
+      ARCHIVE_TYPE: s3
+      ARCHIVE_BUCKET: publicpeople-aleph
+      AWS_ACCESS_KEY_ID:
+      AWS_SECRET_ACCESS_KEY:
+      AWS_REGION: "eu-west-1"
+      ALEPH_ELASTICSEARCH_URI:
+      ALEPH_DATABASE_URI:
+      REDIS_URL:
+      ALEPH_OCR_DEFAULTS: eng
+      ALEPH_MAIL_FROM: "noreply@publicpeople.org.za"
+      ALEPH_MAIL_HOST: smtp.sendgrid.net
+      ALEPH_MAIL_USERNAME: api-key
+      ALEPH_MAIL_PASSWORD: "{{ lookup('passwordstore', 'apps/publicpeople/aleph/SECRET_KEY') }}"
+      ALEPH_MAIL_PORT: "25"
+      ALEPH_MAIL_TLS: true
+      ALEPH_MAIL_SSL: false
+      ALEPH_MAIL_DEBUG: false
+      ALEPH_DEBUG: false
+      ALEPH_CACHE: true
+      LOGGING_LEVEL: error
+      LOGGING_FORMAT: "[%(asctime)s] %(levelname)s:%(name)s:%(message)s"
+    dokku_daemon_install: false # We install this using a dedicated playbook
+    dokku_plugins:
+      - name: letsencrypt
+        url: https://github.com/dokku/dokku-letsencrypt.git
+      - name: postgres
+        url: https://github.com/dokku/dokku-postgres.git
+
+  tasks:
+
+    - name: "convert-document Dokku app exists"
+      dokku_app:
+        app: "{{ app_name }}-convert-document"
+
+    - name: convert-document tmpfs /tmp
+      dokku_docker_options:
+        app: "{{ app_name }}-convert-document"
+        phase: run
+        option: "--mount type=tmpfs,destination=/tmp,tmpfs-mode=777"
+    - name: convert-document tmpfs /root/.config
+      dokku_docker_options:
+        app: "{{ app_name }}-convert-document"
+        phase: run
+        option: "--mount type=tmpfs,destination=/root/.config"
+    - name: convert-document tmpfs /home/app
+      dokku_docker_options:
+        app: "{{ app_name }}-convert-document"
+        phase: run
+        option: "--tmpfs=/home/app:uid=1000,gid=1000"
+
+    - name: "ingest-file Dokku app exists"
+      dokku_app:
+        app: "{{ app_name }}-ingest-file"
+
+    - name: ingest-file tmpfs /tmp
+      dokku_docker_options:
+        app: "{{ app_name }}-ingest-file"
+        phase: run
+        option: "--mount type=tmpfs,destination=/tmp,tmpfs-mode=777"
+
+    - name: "Dokku app config is set"
+      dokku_config:
+        app: "{{ app_name }}-ingest-file"
+        config: "{{ app_env }}"
+
+  worker:
+  api:
+
+
+    - name: "aleph Dokku app exists"
+      dokku_app:
+        app: "{{ app_name }}-api"
+
+    - name: "Dokku app config is set"
+      dokku_config:
+        app: "{{ app_name }}-api"
+        config:
+          DJANGO_DEBUG: "false"
+          DOKKU_LETSENCRYPT_EMAIL: 'jbothma@gmail.com'
+          DJANGO_SECRET_KEY: "{{ lookup('passwordstore', 'apps/publicpeople/DJANGO_SECRET_KEY') }}"
+          SENTRY_DSN: "https://388b7389ba344abb9ae64b9daaa2976a@o350004.ingest.sentry.io/2304582"
+
+    - name: "Dokku app domains are configured"
+      dokku_domains:
+        app: "{{ app_name }}"
+        domains:
+          - "{{ app_domain }}"
+          - "www.{{ app_domain }}"
+
+
+    - name: "Your dokku git remote"
+      debug:
+        msg: "dokku@{{ inventory_hostname }}:{{ app_name }}"

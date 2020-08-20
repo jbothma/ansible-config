@@ -2,4 +2,10 @@ all:
   children:
     publicpeople:
       hosts:
-        hetzner1.whatcanido.org.za
+        hetzner1.whatcanido.org.za:
+        hetzner2.whatcanido.org.za:
+
+    dokkus:
+      hosts:
+        hetzner1.whatcanido.org.za:
+        hetzner2.whatcanido.org.za:
