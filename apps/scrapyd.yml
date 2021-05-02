@@ -1,0 +1,63 @@
+---
+- hosts:
+    - hetzner1.whatcanido.org.za
+  become: yes
+  roles:
+   - dokku_bot.ansible_dokku
+
+
+  vars:
+    app_name: scrapyd
+    app_domain: scrapyd.whatcanido.org.za
+    dokku_daemon_install: false # We install this using a dedicated playbook
+    dokku_plugins:
+      - name: letsencrypt
+        url: https://github.com/dokku/dokku-letsencrypt.git
+      - name: dokku-http-auth
+        url: https://github.com/dokku/dokku-http-auth.git
+
+  tasks:
+
+    - name: "Dokku app exists"
+      dokku_app:
+        app: "{{ app_name }}"
+      tags:
+        - app
+
+    - name: "Dokku app config is set"
+      dokku_config:
+        app: "{{ app_name }}"
+        config:
+          DOKKU_LETSENCRYPT_EMAIL: 'jbothma@gmail.com'
+      tags:
+        - app
+
+    - name: "Dokku app domains are configured"
+      dokku_domains:
+        app: "{{ app_name }}"
+        domains:
+          - "{{ app_domain }}"
+      tags:
+        - app
+
+    - name: "Map app data to a host data directory"
+      dokku_docker_options:
+        app: "{{ app_name }}"
+        phase: run
+        option: "-v /var/lib/{{ app_name }}/data:/var/lib/scrapyd/"
+      tags:
+        - app
+
+    - name: "Map app logs to a logs directory"
+      dokku_docker_options:
+        app: "{{ app_name }}"
+        phase: run
+        option: "-v /var/log/{{ app_name }}/data:/var/log/scrapyd/"
+      tags:
+        - app
+
+    - name: "Your dokku git remote"
+      debug:
+        msg: "dokku@{{ inventory_hostname }}:{{ app_name }}"
+      tags:
+        - app
