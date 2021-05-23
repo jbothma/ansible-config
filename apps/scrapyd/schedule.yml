@@ -1,0 +1,79 @@
+---
+- hosts:
+    - hetzner1.whatcanido.org.za
+  become: yes
+
+  vars:
+    schedule_endpoint: "https://scrapyd.whatcanido.org.za/schedule.json"
+    zanews_token: "{{ lookup('passwordstore', 'apps/scrapenews/SCRAPENEWS_TOKEN')}}"
+    scrapyd_password: "{{ lookup('passwordstore', 'apps/scrapenews/SCRAPYD_BASIC_AUTH')}}"
+    scrapyd_username: "{{ lookup('passwordstore', 'apps/scrapenews/SCRAPYD_BASIC_AUTH subkey=username')}}"
+  tasks:
+
+    - name: "Install 5 days lastmod crontabs"
+      ansible.builtin.cron:
+        name: "schedule-{{ item }}"
+        minute: "0"
+        hour: "1"
+        job: >
+          curl {{ schedule_endpoint }}
+          --fail
+          --user {{ scrapyd_username }}:{{ scrapyd_password }}
+          --data project=scrapenews
+          --data spider={{ item }}
+          --data setting=ZANEWS_TOKEN={{ zanews_token }}
+          --data since_lastmod=$(date +\%Y-\%m-\%d -d "5 day ago")
+          --silent
+          > /dev/null
+      with_items:
+        # - iol
+        - sowetanlive
+        - dailymaverick
+        - news24
+        - businesslivesitemap
+        - dispatchlive
+        - timeslive
+        - sundaytimes
+
+    - name: "Install full crawl crontabs"
+      ansible.builtin.cron:
+        name: "schedule-{{ item }}"
+        minute: "0"
+        hour: "1"
+        day: "1"
+        job: >
+          curl {{ schedule_endpoint }}
+          --fail
+          --user {{ scrapyd_username }}:{{ scrapyd_password }}
+          --data project=scrapenews
+          --data spider={{ item }}
+          --data setting=ZANEWS_TOKEN={{ zanews_token }}
+          --silent
+          > /dev/null
+      with_items:
+        - dfa
+        - ewn
+        - enca
+        - dailyvoice
+        - groundup
+        - sabc
+        - rekordnorth
+
+    - name: "Install hardcoded lastmod crontabs"
+      ansible.builtin.cron:
+        name: "schedule-{{ item }}"
+        minute: "0"
+        hour: "1"
+        day: "1"
+        job: >
+          curl {{ schedule_endpoint }}
+          --fail
+          --user {{ scrapyd_username }}:{{ scrapyd_password }}
+          --data project=scrapenews
+          --data spider={{ item }}
+          --data setting=ZANEWS_TOKEN={{ zanews_token }}
+          --data since_lastmod=1900-01-01
+          --silent
+          > /dev/null
+      with_items:
+        - mg

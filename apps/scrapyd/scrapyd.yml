@@ -7,6 +7,7 @@
 
 
   vars:
+    volume_path: "/mnt/HC_Volume_11373200"
     app_name: scrapyd
     app_domain: scrapyd.whatcanido.org.za
     dokku_daemon_install: false # We install this using a dedicated playbook
@@ -37,6 +38,16 @@
         app: "{{ app_name }}"
         domains:
           - "{{ app_domain }}"
+      tags:
+        - app
+
+    - name: "Map app data and logs to a host directories"
+      dokku_storage:
+        app: "{{ app_name }}"
+        mounts:
+          - "{{ volume_path }}/var/lib/{{ app_name }}/data:/var/lib/scrapyd/"
+          - "{{ volume_path }}/var/log/{{ app_name }}/data:/var/log/scrapyd/"
+        create_host_dir: true
       tags:
         - app
 
