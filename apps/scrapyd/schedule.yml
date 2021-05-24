@@ -53,7 +53,7 @@
       with_items:
         - dfa
         - ewn
-        - enca
+        # - enca
         - dailyvoice
         - groundup
         - sabc
