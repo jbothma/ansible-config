@@ -1,0 +1,57 @@
+---
+- hosts:
+    - alertwatch
+  become: yes
+  roles:
+   - dokku_bot.ansible_dokku
+
+
+  vars:
+    app_name: alertwatch
+    username: "{{ app_name }}"
+    app_domain: alertwatch.whatcanido.org.za
+    dokku_daemon_install: false # We install this using a dedicated playbook
+    dokku_plugins:
+      - name: letsencrypt
+        url: https://github.com/dokku/dokku-letsencrypt.git
+      - name: postgres
+        url: https://github.com/dokku/dokku-postgres.git
+
+  tasks:
+
+    - name: "Dokku app exists"
+      dokku_app:
+        app: "{{ app_name }}"
+      tags:
+        - app
+
+    - name: "Dokku app config is set"
+      dokku_config:
+        app: "{{ app_name }}"
+        config:
+          DJANGO_DEBUG: "false"
+          DOKKU_LETSENCRYPT_EMAIL: 'jbothma@gmail.com'
+          DJANGO_SECRET_KEY: "{{ lookup('passwordstore', 'apps/alertwatch/DJANGO_SECRET_KEY') }}"
+          SENTRY_DSN: "https://5df7c1284e7345bd95afa7a35b541a62@o350004.ingest.sentry.io/6188874"
+          EMAIL_BACKEND: "django.core.mail.backends.smtp.EmailBackend"
+          EMAIL_HOST: "{{ lookup('passwordstore', 'apps/alertwatch/SMTP subkey=hostname') }}"
+          EMAIL_HOST_USER: "{{ lookup('passwordstore', 'apps/alertwatch/SMTP subkey=username') }}"
+          EMAIL_HOST_PASSWORD: "{{ lookup('passwordstore', 'apps/alertwatch/SMTP') }}"
+          TAG_MANAGER_ENABLED: "False"
+          DEFAULT_FROM_EMAIL: "noreply@alertwatch.whatcanido.org.za"
+      tags:
+        - app
+
+    - name: "Dokku app domains are configured"
+      dokku_domains:
+        app: "{{ app_name }}"
+        domains:
+          - "{{ app_domain }}"
+      tags:
+        - app
+
+    - name: "Your dokku git remote"
+      debug:
+        msg: "dokku@{{ inventory_hostname }}:{{ app_name }}"
+      tags:
+        - app

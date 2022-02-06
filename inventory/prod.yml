@@ -1,5 +1,14 @@
 all:
+  hosts:
+  vars:
+    all_hosts_admins:
+      - jdb
+    host_extra_admins: [] # Empty default - override this on specific hosts.
   children:
-    publicpeople:
+    dokkus:
       hosts:
-        hetzner1.whatcanido.org.za
+        hetzner1.whatcanido.org.za:
+
+    alertwatch:
+      hosts:
+        hetzner1.whatcanido.org.za:
