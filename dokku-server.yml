@@ -3,6 +3,8 @@
   become: yes
 
   vars:
+    dokku_version: "0.24.10"
+    sshcommand_version: "0.12.0"
 
   pre_tasks:
     - name: "generate dokku_users"

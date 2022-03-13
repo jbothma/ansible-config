@@ -39,6 +39,7 @@
           EMAIL_HOST_PASSWORD: "{{ lookup('passwordstore', 'apps/alertwatch/SMTP') }}"
           TAG_MANAGER_ENABLED: "False"
           DEFAULT_FROM_EMAIL: "noreply@alertwatch.whatcanido.org.za"
+          MAILBOX_DOMAIN: "alertwatch.whatcanido.org.za"
       tags:
         - app
 
