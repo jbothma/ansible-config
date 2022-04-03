@@ -37,8 +37,9 @@
           EMAIL_HOST: "{{ lookup('passwordstore', 'apps/alertwatch/SMTP subkey=hostname') }}"
           EMAIL_HOST_USER: "{{ lookup('passwordstore', 'apps/alertwatch/SMTP subkey=username') }}"
           EMAIL_HOST_PASSWORD: "{{ lookup('passwordstore', 'apps/alertwatch/SMTP') }}"
-          TAG_MANAGER_ENABLED: "False"
+          TAG_MANAGER_CONTAINER_ID: "GTM-TXDV43N"
           DEFAULT_FROM_EMAIL: "noreply@alertwatch.whatcanido.org.za"
+          MAILBOX_DOMAIN: "alertwatch.whatcanido.org.za"
       tags:
         - app
 

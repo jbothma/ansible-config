@@ -12,3 +12,7 @@ all:
     alertwatch:
       hosts:
         hetzner1.whatcanido.org.za:
+
+    publicpeople:
+      hosts:
+        hetzner1.whatcanido.org.za:

@@ -75,5 +75,6 @@
           --data since_lastmod=1900-01-01
           --silent
           > /dev/null
+        state: absent
       with_items:
         - mg
