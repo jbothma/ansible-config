@@ -1,15 +1,15 @@
 ---
 - hosts:
-    - alertwatch
+    - notimon
   become: yes
   roles:
    - dokku_bot.ansible_dokku
 
 
   vars:
-    app_name: alertwatch
+    app_name: notimon
     username: "{{ app_name }}"
-    app_domain: alertwatch.whatcanido.org.za
+    app_domain: notimon.com
     dokku_daemon_install: false # We install this using a dedicated playbook
     dokku_plugins:
       - name: letsencrypt
@@ -31,15 +31,15 @@
         config:
           DJANGO_DEBUG: "false"
           DOKKU_LETSENCRYPT_EMAIL: 'jbothma@gmail.com'
-          DJANGO_SECRET_KEY: "{{ lookup('passwordstore', 'apps/alertwatch/DJANGO_SECRET_KEY') }}"
+          DJANGO_SECRET_KEY: "{{ lookup('passwordstore', 'apps/notimon/DJANGO_SECRET_KEY') }}"
           SENTRY_DSN: "https://5df7c1284e7345bd95afa7a35b541a62@o350004.ingest.sentry.io/6188874"
           EMAIL_BACKEND: "django.core.mail.backends.smtp.EmailBackend"
-          EMAIL_HOST: "{{ lookup('passwordstore', 'apps/alertwatch/SMTP subkey=hostname') }}"
-          EMAIL_HOST_USER: "{{ lookup('passwordstore', 'apps/alertwatch/SMTP subkey=username') }}"
-          EMAIL_HOST_PASSWORD: "{{ lookup('passwordstore', 'apps/alertwatch/SMTP') }}"
+          EMAIL_HOST: "{{ lookup('passwordstore', 'apps/notimon/SMTP subkey=hostname') }}"
+          EMAIL_HOST_USER: "{{ lookup('passwordstore', 'apps/notimon/SMTP subkey=username') }}"
+          EMAIL_HOST_PASSWORD: "{{ lookup('passwordstore', 'apps/notimon/SMTP') }}"
           TAG_MANAGER_CONTAINER_ID: "GTM-TXDV43N"
-          DEFAULT_FROM_EMAIL: "noreply@alertwatch.whatcanido.org.za"
-          MAILBOX_DOMAIN: "alertwatch.whatcanido.org.za"
+          DEFAULT_FROM_EMAIL: "noreply@notimon.com"
+          MAILBOX_DOMAIN: "notimon.com"
       tags:
         - app
 

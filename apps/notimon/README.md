@@ -8,3 +8,4 @@
 6. Enable the dokku letsencrypt cron job for the app
 7. push the app to the dokku git remote
 8. Run migrations
+9. Scale worker to 1

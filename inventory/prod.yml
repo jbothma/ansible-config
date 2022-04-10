@@ -9,7 +9,7 @@ all:
       hosts:
         hetzner1.whatcanido.org.za:
 
-    alertwatch:
+    notimon:
       hosts:
         hetzner1.whatcanido.org.za:
 
