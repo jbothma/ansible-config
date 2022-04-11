@@ -39,7 +39,7 @@
           EMAIL_HOST_PASSWORD: "{{ lookup('passwordstore', 'apps/notimon/SMTP') }}"
           TAG_MANAGER_CONTAINER_ID: "GTM-TXDV43N"
           DEFAULT_FROM_EMAIL: "noreply@notimon.com"
-          MAILBOX_DOMAIN: "notimon.com"
+          MAILBOX_DOMAIN: "mailbox.notimon.com"
       tags:
         - app
 
