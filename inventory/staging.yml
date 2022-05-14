@@ -1,0 +1,22 @@
+all:
+  hosts:
+  vars:
+    env_name: staging
+    all_hosts_admins:
+      - jdb
+    host_extra_admins: [] # Empty default - override this on specific hosts.
+  children:
+    dokkus:
+      hosts:
+        hetzner1.whatcanido.org.za:
+
+    notimon:
+      hosts:
+        hetzner1.whatcanido.org.za:
+      vars:
+        app_domain: staging.notimon.com
+        mailbox_domain: mailbox.staging.notimon.com
+        default_from_email: noreply@staging.notimon.com
+        tag_manager_enabled: "false"
+        tag_manager_container_id: "shouldn't be used because disabled."
+        disable_search_engine_indexing: "true"
