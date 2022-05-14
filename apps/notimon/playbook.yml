@@ -40,6 +40,8 @@
           TAG_MANAGER_CONTAINER_ID: "GTM-TXDV43N"
           DEFAULT_FROM_EMAIL: "noreply@notimon.com"
           MAILBOX_DOMAIN: "mailbox.notimon.com"
+          HCAPTCHA_SITEKEY: "{{ lookup('passwordstore', 'apps/notimon/HCAPTCHA subkey=sitekey') }}"
+          HCAPTCHA_SECRET: "{{ lookup('passwordstore', 'apps/notimon/HCAPTCHA') }}"
       tags:
         - app
 
