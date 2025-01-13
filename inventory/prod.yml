@@ -8,7 +8,7 @@ all:
   children:
     dokkus:
       hosts:
-        hetzner1.whatcanido.org.za:
+        hetzner2.notimon.com:
 
     notimon:
       hosts:
@@ -24,3 +24,9 @@ all:
     publicpeople:
       hosts:
         hetzner1.whatcanido.org.za:
+
+    devs-exps:
+      hosts:
+        hetzner2.notimon.com:
+      vars:
+        app_domain: devs-exps.publicpeople.org.za

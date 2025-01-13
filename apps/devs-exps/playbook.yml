@@ -1,0 +1,77 @@
+---
+- hosts:
+    - devs-exps
+  become: yes
+  roles:
+    - dokku_bot.ansible_dokku
+
+
+  vars:
+    app_name: "devs-exps-{{ env_name }}"
+    dokku_daemon_install: false # We install this using a dedicated playbook
+    dokku_plugins:
+      - name: letsencrypt
+        url: https://github.com/dokku/dokku-letsencrypt.git
+
+  tasks:
+
+    - name: "Dokku app exists"
+      dokku_app:
+        app: "{{ app_name }}"
+      tags:
+        - app
+
+    - name: ports:set hello-world http:80:80
+      dokku_ports:
+        app: "{{ app_name }}"
+        mappings:
+          - http:80:8001
+
+    - name: Disable global domain
+      dokku_domains:
+        app: "{{ app_name }}"
+        domains:
+          - dokku.me
+        state: absent
+        global: true
+      tags:
+        - app
+
+    - name: Remove default domain
+      dokku_domains:
+        app: "{{ app_name }}"
+        domains:
+          - "{{ app_name }}.dokku.me"
+        state: absent
+      tags:
+        - app
+
+    - name: "Dokku app domains are configured"
+      dokku_domains:
+        app: "{{ app_name }}"
+        domains:
+          - "{{ app_domain }}"
+      tags:
+        - app
+
+    - name: environment configuration
+      dokku_config:
+        app: "{{ app_name }}"
+        config:
+          # specify port so `domains` can setup the port mapping properly
+          DOKKU_LETSENCRYPT_EMAIL: 'jbothma@gmail.com'
+      tags:
+        - app
+
+    - name: Pull and deploy image
+      dokku_image:
+        app: "{{ app_name }}"
+        image: jbothma/deviations-expansions-datasette
+      tags:
+        - create-app
+
+    - name: add letsencrypt
+      dokku_letsencrypt:
+        app: "{{ app_name }}"
+      tags:
+        - app
