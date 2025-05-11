@@ -12,14 +12,9 @@ all:
 
     notimon:
       hosts:
-        hetzner1.whatcanido.org.za:
+        hetzner2.notimon.com:
       vars:
         app_domain: notimon.com
-        mailbox_domain: mailbox.notimon.com
-        default_from_email: noreply@notimon.com
-        tag_manager_enabled: "true"
-        tag_manager_container_id: "GTM-TXDV43N"
-        disable_search_engine_indexing: "false"
 
     publicpeople:
       hosts:

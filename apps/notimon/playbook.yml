@@ -1,7 +1,7 @@
 ---
 - hosts:
     - notimon
-  become: yes
+  become: true
   roles:
    - dokku_bot.ansible_dokku
 
@@ -24,31 +24,40 @@
       tags:
         - app
 
-    - name: "Dokku app config is set"
-      dokku_config:
+    #- name: "Dokku app config is set"
+    #  dokku_config:
+    #    app: "{{ app_name }}"
+    #    config:
+    #      AAA: bbb
+    #  tags:
+    #    - app
+
+
+
+    - name: Disable global domain
+      dokku_domains:
         app: "{{ app_name }}"
-        config:
-          DJANGO_DEBUG: "false"
-          DOKKU_LETSENCRYPT_EMAIL: 'jbothma@gmail.com'
-          DJANGO_SECRET_KEY: "{{ lookup('passwordstore', 'apps/notimon/{{ env_name }}/DJANGO_SECRET_KEY') }}"
-          SENTRY_DSN: "https://5df7c1284e7345bd95afa7a35b541a62@o350004.ingest.sentry.io/6188874"
-          ENVIRONMENT: "{{ env_name }}"
-          EMAIL_BACKEND: "django.core.mail.backends.smtp.EmailBackend"
-          EMAIL_HOST: "{{ lookup('passwordstore', 'apps/notimon/{{ env_name }}/SMTP subkey=hostname') }}"
-          EMAIL_HOST_USER: "{{ lookup('passwordstore', 'apps/notimon/{{ env_name }}/SMTP subkey=username') }}"
-          EMAIL_HOST_PASSWORD: "{{ lookup('passwordstore', 'apps/notimon/{{ env_name }}/SMTP') }}"
-          TAG_MANAGER_CONTAINER_ID: "{{ tag_manager_container_id }}"
-          TAG_MANAGER_ENABLED: "{{ tag_manager_enabled }}"
-          DEFAULT_FROM_EMAIL: "{{ default_from_email }}"
-          MAILBOX_DOMAIN: "{{ mailbox_domain }}"
-          HCAPTCHA_SITEKEY: "{{ lookup('passwordstore', 'apps/notimon/{{ env_name }}/HCAPTCHA subkey=sitekey') }}"
-          HCAPTCHA_SECRET: "{{ lookup('passwordstore', 'apps/notimon/{{ env_name }}/HCAPTCHA') }}"
-          PAYPAL_CLIENT_ID: "{{ lookup('passwordstore', 'apps/notimon/{{ env_name }}/PAYPAL subkey=client_id') }}"
-          PAYPAL_CLIENT_SECRET: "{{ lookup('passwordstore', 'apps/notimon/{{ env_name }}/PAYPAL') }}"
-          PAYPAL_ENDPOINT: "{{ lookup('passwordstore', 'apps/notimon/{{ env_name }}/PAYPAL subkey=endpoint') }}"
-          DISABLE_SEARCH_ENGINE_INDEXING: "{{ disable_search_engine_indexing }}"
+        domains:
+          - dokku.me
+        state: absent
+        global: true
       tags:
         - app
+
+    - name: Remove default domain
+      dokku_domains:
+        app: "{{ app_name }}"
+        domains:
+          - "{{ app_name }}.dokku.me"
+        state: absent
+      tags:
+        - app
+
+    - name: ports:set http:80:3000
+      dokku_ports:
+        app: "{{ app_name }}"
+        mappings:
+          - http:80:3000
 
     - name: "Dokku app domains are configured"
       dokku_domains:
